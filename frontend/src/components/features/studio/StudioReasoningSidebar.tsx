@@ -81,11 +81,7 @@ export function StudioReasoningSidebar({
                 </article>
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute left-0 top-3 h-0 w-0 -translate-x-full border-y-[8px] border-y-transparent border-r-[10px] border-r-white/35 dark:border-r-white/10"
-                />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute left-0 top-[18px] h-0 w-0 -translate-x-full border-y-[6px] border-y-transparent border-r-[8px] border-r-background/58 dark:border-r-background/25"
+                  className="pointer-events-none absolute left-0 top-3 h-3.5 w-3.5 -translate-x-[70%] bg-background/58 [clip-path:polygon(100%_0,0_50%,100%_100%)] dark:bg-background/25"
                 />
               </div>
             ))}

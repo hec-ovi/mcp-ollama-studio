@@ -92,27 +92,15 @@ export function StudioChatPanel({
               )}
             </article>
             {message.role === "user" ? (
-              <>
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute right-0 top-3 h-0 w-0 translate-x-full border-y-[8px] border-y-transparent border-l-[10px] border-l-primary/35"
-                />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute right-px top-[18px] h-0 w-0 translate-x-full border-y-[6px] border-y-transparent border-l-[8px] border-l-primary/14"
-                />
-              </>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute right-0 top-3 h-3.5 w-3.5 translate-x-[70%] bg-primary/14 [clip-path:polygon(0_0,100%_50%,0_100%)]"
+              />
             ) : (
-              <>
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute left-0 top-3 h-0 w-0 -translate-x-full border-y-[8px] border-y-transparent border-r-[10px] border-r-white/35 dark:border-r-white/10"
-                />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute left-0 top-[18px] h-0 w-0 -translate-x-full border-y-[6px] border-y-transparent border-r-[8px] border-r-background/72 dark:border-r-background/40"
-                />
-              </>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-0 top-3 h-3.5 w-3.5 -translate-x-[70%] bg-background/72 [clip-path:polygon(100%_0,0_50%,100%_100%)] dark:bg-background/40"
+              />
             )}
           </div>
         ))}
