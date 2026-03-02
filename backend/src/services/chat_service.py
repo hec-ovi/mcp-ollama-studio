@@ -40,9 +40,12 @@ class ChatService:
         model_name = request.model or self._agent_service.default_model
 
         stream_finished = False
+        token_emitted = False
+        error_emitted = False
         try:
             async for event in self._agent_service.stream_events(request):
                 if event.type == StreamEventType.TOKEN and event.token is not None:
+                    token_emitted = True
                     payload = {
                         "id": completion_id,
                         "object": "chat.completion.chunk",
@@ -67,6 +70,7 @@ class ChatService:
                     continue
 
                 if event.type == StreamEventType.ERROR and event.error is not None:
+                    error_emitted = True
                     yield self._format_event_line("error", {"message": event.error})
                     continue
 
@@ -74,13 +78,27 @@ class ChatService:
                     stream_finished = True
                     break
         except AgentExecutionError as exc:
+            error_emitted = True
             yield self._format_event_line("error", {"message": self._compact_error(str(exc))})
         except Exception as exc:  # pragma: no cover - defensive catch for stream safety
+            error_emitted = True
             yield self._format_event_line("error", {"message": self._compact_error(str(exc))})
 
         if not stream_finished:
             # Close the client stream even when the upstream agent run fails.
             stream_finished = True
+
+        if not token_emitted and not error_emitted:
+            error_emitted = True
+            yield self._format_event_line(
+                "error",
+                {
+                    "message": (
+                        "The agent finished without generating a final text answer. "
+                        "Try a narrower prompt or select fewer MCP tools."
+                    )
+                },
+            )
 
         if stream_finished:
             final_payload = {

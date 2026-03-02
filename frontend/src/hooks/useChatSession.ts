@@ -30,6 +30,14 @@ export function useChatSession(): ChatSessionResult {
   const [isRunning, setIsRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const removeTrailingEmptyAssistant = (items: ChatMessage[]): ChatMessage[] => {
+    const last = items.at(-1)
+    if (!last || last.role !== "assistant" || last.content.trim().length > 0) {
+      return items
+    }
+    return items.slice(0, -1)
+  }
+
   const sendMessage = useCallback(
     async (content: string, options: SendMessageOptions) => {
       if (!content.trim()) {
@@ -40,6 +48,7 @@ export function useChatSession(): ChatSessionResult {
       const conversation = [...messages, userMessage]
 
       setMessages(conversation)
+      setTraces([])
       setError(null)
       setIsRunning(true)
 
@@ -50,6 +59,9 @@ export function useChatSession(): ChatSessionResult {
 
       try {
         if (options.stream) {
+          let receivedToken = false
+          let streamReportedError = false
+
           setMessages((previous) => [
             ...previous,
             { role: "assistant", content: "" },
@@ -57,6 +69,7 @@ export function useChatSession(): ChatSessionResult {
 
           await streamCompletion(request, {
             onToken: (token) => {
+              receivedToken = true
               setMessages((previous) => {
                 const updated = [...previous]
                 const last = updated.at(-1)
@@ -74,12 +87,20 @@ export function useChatSession(): ChatSessionResult {
               setTraces((previous) => [...previous, trace])
             },
             onError: (streamError) => {
+              streamReportedError = true
               setError(streamError)
             },
-            onDone: () => {
-              setIsRunning(false)
-            },
+            onDone: () => undefined,
           })
+
+          if (!receivedToken) {
+            setMessages((previous) => removeTrailingEmptyAssistant(previous))
+            if (!streamReportedError) {
+              setError(
+                "The agent finished without a visible answer. Try a narrower prompt or fewer MCP tools.",
+              )
+            }
+          }
           return
         }
 
@@ -90,14 +111,15 @@ export function useChatSession(): ChatSessionResult {
           ...previous,
           { role: "assistant", content: answer },
         ])
-        setTraces((previous) => [...previous, ...response.reasoning_trace])
-        setIsRunning(false)
+        setTraces(response.reasoning_trace)
       } catch (err) {
+        setMessages((previous) => removeTrailingEmptyAssistant(previous))
         setError(
           err instanceof Error
             ? err.message
             : "Unexpected error while generating completion.",
         )
+      } finally {
         setIsRunning(false)
       }
     },

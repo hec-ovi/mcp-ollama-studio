@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 
 from src.core.settings import Settings
@@ -55,3 +56,4 @@ def test_to_client_config_maps_transports(tmp_path: Path) -> None:
 
     assert mapped["deepwiki"]["transport"] == "streamable_http"
     assert mapped["time"]["transport"] == "stdio"
+    assert mapped["time"]["command"] == sys.executable

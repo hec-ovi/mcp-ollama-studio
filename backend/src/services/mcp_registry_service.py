@@ -1,6 +1,7 @@
 import asyncio
 import json
 import shutil
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -71,9 +72,10 @@ class MCPRegistryService:
                 continue
 
             if server.transport == MCPTransport.STDIO and server.command is not None:
+                command = self._resolve_stdio_command(server.command)
                 config[server.name] = {
                     "transport": server.transport.value,
-                    "command": server.command,
+                    "command": command,
                     "args": server.args,
                     "env": server.env,
                 }
@@ -147,12 +149,13 @@ class MCPRegistryService:
         """Check availability of a local stdio server command."""
         assert server.command is not None
 
-        command_available = shutil.which(server.command) is not None
+        resolved_command = self._resolve_stdio_command(server.command)
+        command_available = shutil.which(resolved_command) is not None
         if not command_available:
-            detail = f"Command not found in PATH: {server.command}"
+            detail = f"Command not found in PATH: {resolved_command}"
             available = False
         else:
-            detail = f"Command available: {server.command}"
+            detail = f"Command available: {resolved_command}"
             available = True
 
         return MCPServerStatus(
@@ -165,3 +168,9 @@ class MCPRegistryService:
             available=available,
             detail=detail,
         )
+
+    def _resolve_stdio_command(self, command: str) -> str:
+        """Use the active interpreter for python-based stdio MCP servers."""
+        if command in {"python", "python3"}:
+            return sys.executable
+        return command

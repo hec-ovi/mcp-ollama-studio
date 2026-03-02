@@ -59,11 +59,11 @@ export function ChatStudio() {
       return
     }
 
+    setDraft("")
     await sendMessage(trimmed, {
       stream: true,
       mcpServers: effectiveSelectedServers,
     })
-    setDraft("")
   }
 
   useEffect(() => {

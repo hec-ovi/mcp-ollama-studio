@@ -15,7 +15,9 @@ This repo currently runs **3 containers**:
 - LangGraph ReAct agent orchestration with MCP tools
 - OpenAI-compatible completion endpoint (`/api/v1/chat/completions`)
 - Streaming SSE with token chunks + `trace` events + `[DONE]`
+- Stream safety guard: if no assistant tokens are produced, backend emits `event: error` before `[DONE]`
 - MCP registry loaded from separated JSON schemas
+- Stdio MCP runtime safety: `python` commands are resolved to the backend interpreter (`sys.executable`)
 - Default no-auth MCP set:
   - DeepWiki (streamable HTTP)
   - Fetch (stdio)
@@ -67,6 +69,7 @@ This repo currently runs **3 containers**:
 │   │   └── prompts/
 │   │       └── system_prompt.md
 │   └── tests/
+│       ├── test_chat_service.py
 │       ├── test_message_utils.py
 │       └── test_mcp_registry_service.py
 └── frontend/
@@ -104,6 +107,7 @@ LLM adapter is provider-agnostic as long as endpoint is OpenAI-compatible (`/v1`
   - `stream=false`: JSON response with `choices` + `reasoning_trace`
   - `stream=true`: `text/event-stream`
     - `event: trace` + JSON trace payload
+    - `event: error` when the run completes without an assistant text answer
     - `data: {chat.completion.chunk}` token chunks
     - `data: [DONE]`
 
