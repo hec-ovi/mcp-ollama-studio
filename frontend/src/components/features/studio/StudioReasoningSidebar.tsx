@@ -71,7 +71,7 @@ export function StudioReasoningSidebar({
             {traces.map((trace, index) => (
               <div
                 key={`${trace.node}-${trace.occurred_at}-${index}`}
-                className="relative ml-3"
+                className="ml-1"
               >
                 <article className="rounded-2xl border border-white/35 bg-background/58 p-2 shadow-[0_12px_24px_-20px_hsl(var(--foreground)/0.45)] dark:border-white/10 dark:bg-background/25">
                   <p className="text-xs font-semibold uppercase tracking-wide text-primary">
@@ -79,10 +79,6 @@ export function StudioReasoningSidebar({
                   </p>
                   <p className="text-sm text-foreground/90">{trace.summary}</p>
                 </article>
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute left-0 top-3 h-3.5 w-3.5 -translate-x-[70%] bg-background/58 [clip-path:polygon(100%_0,0_50%,100%_100%)] dark:bg-background/25"
-                />
               </div>
             ))}
           </motion.div>

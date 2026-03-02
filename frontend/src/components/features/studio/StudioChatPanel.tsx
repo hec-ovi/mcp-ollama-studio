@@ -71,15 +71,15 @@ export function StudioChatPanel({
         {messages.map((message, index) => (
           <div
             key={`${message.role}-${index}`}
-            className={`relative max-w-[86%] ${
-              message.role === "user" ? "ml-auto pr-3" : "mr-auto pl-3"
+            className={`max-w-[86%] ${
+              message.role === "user" ? "ml-auto" : "mr-auto"
             }`}
           >
             <article
               className={`rounded-2xl border px-3 py-2 text-sm leading-relaxed ${
                 message.role === "user"
-                  ? "border-primary/35 bg-primary/14"
-                  : "border-white/35 bg-background/72 dark:border-white/10 dark:bg-background/40"
+                  ? "rounded-br-none border-primary/35 bg-primary/14"
+                  : "rounded-tr-none border-white/35 bg-background/72 dark:border-white/10 dark:bg-background/40"
               }`}
             >
               <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -91,17 +91,6 @@ export function StudioChatPanel({
                 <p className="whitespace-pre-wrap">{message.content || "..."}</p>
               )}
             </article>
-            {message.role === "user" ? (
-              <span
-                aria-hidden
-                className="pointer-events-none absolute right-0 top-3 h-3.5 w-3.5 translate-x-[70%] bg-primary/14 [clip-path:polygon(0_0,100%_50%,0_100%)]"
-              />
-            ) : (
-              <span
-                aria-hidden
-                className="pointer-events-none absolute left-0 top-3 h-3.5 w-3.5 -translate-x-[70%] bg-background/72 [clip-path:polygon(100%_0,0_50%,100%_100%)] dark:bg-background/40"
-              />
-            )}
           </div>
         ))}
       </section>
