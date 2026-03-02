@@ -86,11 +86,11 @@ class ChatService:
 
     def _format_data_line(self, payload: dict[str, object]) -> bytes:
         """Format a default SSE data event."""
-        return f"data: {json.dumps(payload)}\\n\\n".encode()
+        return f"data: {json.dumps(payload)}\n\n".encode()
 
     def _format_event_line(self, event_name: str, payload: dict[str, object]) -> bytes:
         """Format a named SSE event."""
         return (
-            f"event: {event_name}\\n"
-            f"data: {json.dumps(payload)}\\n\\n"
+            f"event: {event_name}\n"
+            f"data: {json.dumps(payload)}\n\n"
         ).encode()
