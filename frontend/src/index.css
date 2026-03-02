@@ -2,15 +2,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: 44 34% 96%;
+  --background: 210 28% 97%;
   --foreground: 222 39% 12%;
-  --muted-foreground: 220 16% 38%;
-  --panel: 41 48% 91%;
-  --border: 31 22% 77%;
-  --primary: 189 87% 34%;
-  --primary-foreground: 44 34% 97%;
-  --secondary: 29 78% 54%;
-  --accent: 152 48% 41%;
+  --muted-foreground: 220 14% 37%;
+  --panel: 210 25% 92%;
+  --border: 214 15% 79%;
+  --primary: 197 86% 38%;
+  --primary-foreground: 210 28% 98%;
+  --secondary: 20 88% 54%;
+  --accent: 163 56% 40%;
 }
 
 .dark {

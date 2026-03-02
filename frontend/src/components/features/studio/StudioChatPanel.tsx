@@ -9,14 +9,11 @@ interface StudioChatPanelProps {
   messages: ChatMessage[]
   starterPrompts: string[]
   draft: string
-  streamEnabled: boolean
-  selectedServersCount: number
   isRunning: boolean
   error: string | null
   onSubmit: () => Promise<void>
   onClearConversation: () => void
   onDraftChange: (value: string) => void
-  onStreamEnabledChange: (enabled: boolean) => void
 }
 
 export function StudioChatPanel({
@@ -24,14 +21,11 @@ export function StudioChatPanel({
   messages,
   starterPrompts,
   draft,
-  streamEnabled,
-  selectedServersCount,
   isRunning,
   error,
   onSubmit,
   onClearConversation,
   onDraftChange,
-  onStreamEnabledChange,
 }: StudioChatPanelProps) {
   const onPromptKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -96,28 +90,12 @@ export function StudioChatPanel({
       </section>
 
       <footer className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border/70 bg-background/60 px-3 py-1.5 text-xs font-medium text-muted-foreground">
-            <input
-              type="checkbox"
-              checked={streamEnabled}
-              onChange={(event) => onStreamEnabledChange(event.target.checked)}
-              className="accent-primary"
-            />
-            Streaming
-          </label>
-
-          <span className="text-xs text-muted-foreground">
-            Active MCPs: {selectedServersCount || "all enabled"}
-          </span>
-
-          {isRunning && (
-            <span className="inline-flex items-center gap-2 text-xs text-primary">
-              <LoaderCircle size={13} className="animate-spin" />
-              generating...
-            </span>
-          )}
-        </div>
+        {isRunning && (
+          <div className="flex items-center gap-2 text-xs text-primary">
+            <LoaderCircle size={13} className="animate-spin" />
+            generating...
+          </div>
+        )}
 
         <div className="relative flex h-12 items-center overflow-hidden rounded-r-3xl border border-border/70 bg-background/70">
           <input
@@ -134,7 +112,7 @@ export function StudioChatPanel({
               void onSubmit()
             }}
             disabled={isRunning || !draft.trim()}
-            className="absolute right-0 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-55"
+            className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-55"
             aria-label="Send message"
             title="Send"
           >

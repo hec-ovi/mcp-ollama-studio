@@ -18,7 +18,6 @@ export function ChatStudio() {
     useChatSession()
 
   const [draft, setDraft] = useState("")
-  const [streamEnabled, setStreamEnabled] = useState(true)
   const [selectedServers, setSelectedServers] = useState<string[]>([])
   const [toolPanelOpen, setToolPanelOpen] = useState(true)
   const [tracePanelOpen, setTracePanelOpen] = useState(true)
@@ -61,7 +60,7 @@ export function ChatStudio() {
     }
 
     await sendMessage(trimmed, {
-      stream: streamEnabled,
+      stream: true,
       mcpServers: effectiveSelectedServers,
     })
     setDraft("")
@@ -102,14 +101,11 @@ export function ChatStudio() {
         messages={messages}
         draft={draft}
         starterPrompts={STARTER_PROMPTS}
-        streamEnabled={streamEnabled}
-        selectedServersCount={effectiveSelectedServers.length}
         isRunning={isRunning}
         error={error}
         onSubmit={onSubmit}
         onClearConversation={clearConversation}
         onDraftChange={setDraft}
-        onStreamEnabledChange={setStreamEnabled}
       />
 
       <StudioReasoningSidebar
