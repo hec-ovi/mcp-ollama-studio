@@ -1,3 +1,4 @@
+import re
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
@@ -59,6 +60,9 @@ class AgentService:
         temperature = request.temperature
         if temperature is None:
             temperature = self._settings.llm_temperature
+        token_emitted = False
+        last_trace_summary: str | None = None
+        tool_findings: list[str] = []
 
         selected_servers = self._registry.resolve_servers(request.mcp_servers)
         trace_summary = ", ".join(server.label for server in selected_servers)
@@ -85,14 +89,25 @@ class AgentService:
             ):
                 if mode == "messages":
                     for event in self._stream_message_chunk(chunk):
+                        token_emitted = True
                         yield event
                     continue
 
                 if mode == "updates":
                     for step in self._parse_update_chunk(chunk):
+                        if step.summary == last_trace_summary:
+                            continue
+                        last_trace_summary = step.summary
+                        if step.node == "tools":
+                            tool_findings.append(self._extract_trace_detail(step.summary))
                         yield StreamEvent(type=StreamEventType.TRACE, trace=step)
         except Exception as exc:
             raise AgentExecutionError(str(exc)) from exc
+
+        if not token_emitted:
+            fallback = self._build_fallback_answer(tool_findings)
+            if fallback:
+                yield StreamEvent(type=StreamEventType.TOKEN, token=fallback)
 
         yield StreamEvent(type=StreamEventType.DONE)
 
@@ -158,6 +173,7 @@ class AgentService:
                 if message_type == "tool":
                     tool_name = getattr(message, "name", "tool")
                     preview = extract_text_content(getattr(message, "content", "")).strip()
+                    preview = self._sanitize_tool_preview(preview)
                     if len(preview) > 120:
                         preview = f"{preview[:117]}..."
                     detail = preview or "Tool returned data"
@@ -169,3 +185,52 @@ class AgentService:
                     )
 
         return steps
+
+    def _sanitize_tool_preview(self, preview: str) -> str:
+        """Normalize noisy tool wrappers into concise, readable trace snippets."""
+        if not preview:
+            return preview
+
+        marker = "cannot be simplified to markdown, but here is the raw content:"
+        if marker in preview:
+            preview = preview.split(marker, 1)[1].strip()
+
+        if preview.lower().startswith("contents of "):
+            if ":\n" in preview:
+                preview = preview.split(":\n", 1)[1].strip()
+            elif ": " in preview:
+                preview = preview.split(": ", 1)[1].strip()
+
+        # Remove basic HTML tags that can dominate trace snippets.
+        preview = re.sub(r"<[^>]+>", "", preview).strip()
+        return preview
+
+    def _extract_trace_detail(self, summary: str) -> str:
+        """Extract trace detail payload from a formatted summary string."""
+        marker = "responded: "
+        if marker not in summary:
+            return summary
+        return summary.split(marker, 1)[1].strip()
+
+    def _build_fallback_answer(self, tool_findings: list[str]) -> str | None:
+        """Create a concise fallback answer when no model tokens are emitted."""
+        cleaned = [item.strip() for item in tool_findings if item.strip()]
+        if not cleaned:
+            return None
+
+        unique: list[str] = []
+        for item in cleaned:
+            if item not in unique:
+                unique.append(item)
+
+        bullets: list[str] = []
+        for item in unique[:3]:
+            snippet = item if len(item) <= 220 else f"{item[:217]}..."
+            bullets.append(f"- {snippet}")
+
+        return (
+            "I collected tool results but could not finish a full model summary within the step "
+            "limit. Here are the key findings:\n\n"
+            "### Key findings\n"
+            f"{'\n'.join(bullets)}"
+        )

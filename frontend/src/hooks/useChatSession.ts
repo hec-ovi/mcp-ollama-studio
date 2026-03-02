@@ -48,7 +48,6 @@ export function useChatSession(): ChatSessionResult {
       const conversation = [...messages, userMessage]
 
       setMessages(conversation)
-      setTraces([])
       setError(null)
       setIsRunning(true)
 

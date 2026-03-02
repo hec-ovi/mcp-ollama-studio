@@ -15,9 +15,10 @@ This repo currently runs **3 containers**:
 - LangGraph ReAct agent orchestration with MCP tools
 - OpenAI-compatible completion endpoint (`/api/v1/chat/completions`)
 - Streaming SSE with token chunks + `trace` events + `[DONE]`
-- Stream safety guard: if no assistant tokens are produced, backend emits `event: error` before `[DONE]`
+- Stream safety guard: if no assistant tokens are produced, backend emits a fallback summary from tool findings (or `event: error` when no findings exist)
 - MCP registry loaded from separated JSON schemas
 - Stdio MCP runtime safety: `python` commands are resolved to the backend interpreter (`sys.executable`)
+- Tool trace cleanup: noisy Fetch wrappers are normalized to readable snippets
 - Default no-auth MCP set:
   - DeepWiki (streamable HTTP)
   - Fetch (stdio)
@@ -30,6 +31,7 @@ This repo currently runs **3 containers**:
   - collapsible model thinking blocks
   - themed custom scrollbars
   - streaming auto-scroll
+  - persistent reasoning trace history across turns
 - OpenAPI docs, Swagger, ReDoc
 
 ## Repository Structure

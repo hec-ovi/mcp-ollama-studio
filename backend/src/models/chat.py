@@ -29,7 +29,7 @@ class ChatCompletionRequest(BaseModel):
         description="Sampling temperature.",
     )
     max_steps: int = Field(
-        default=8,
+        default=12,
         ge=1,
         le=24,
         description="Maximum LangGraph recursion steps.",
