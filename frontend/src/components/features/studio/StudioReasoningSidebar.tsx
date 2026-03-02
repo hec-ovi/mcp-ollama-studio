@@ -38,13 +38,13 @@ export function StudioReasoningSidebar({
   }, [isOpen, traces])
 
   return (
-    <aside className="flex h-full min-h-0 flex-col overflow-hidden border-l border-border/75 bg-panel/90 p-2">
+    <aside className="glass-widget flex h-full min-h-0 flex-col overflow-hidden p-2">
       <div className="mb-2 flex items-center justify-between px-2 py-1">
         {isOpen && <h3 className="font-display text-base font-semibold">Reasoning Trace</h3>}
         <button
           type="button"
           onClick={onToggle}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/70 bg-background/70 text-muted-foreground transition hover:text-foreground"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/35 bg-background/55 text-muted-foreground transition hover:text-foreground dark:border-white/10 dark:bg-background/25"
           aria-label={isOpen ? "Collapse reasoning trace" : "Expand reasoning trace"}
           title={isOpen ? "Collapse reasoning trace" : "Expand reasoning trace"}
         >
@@ -61,7 +61,7 @@ export function StudioReasoningSidebar({
             exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             ref={traceViewportRef}
-            className="studio-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto px-1 pb-1"
+            className="studio-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-1 pb-1"
           >
             {traces.length === 0 && (
               <p className="text-sm text-muted-foreground">
@@ -69,15 +69,25 @@ export function StudioReasoningSidebar({
               </p>
             )}
             {traces.map((trace, index) => (
-              <article
+              <div
                 key={`${trace.node}-${trace.occurred_at}-${index}`}
-                className="border border-border/70 bg-background/70 p-2"
+                className="relative ml-3"
               >
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                  {trace.node}
-                </p>
-                <p className="text-sm text-foreground/90">{trace.summary}</p>
-              </article>
+                <article className="rounded-2xl border border-white/35 bg-background/58 p-2 shadow-[0_12px_24px_-20px_hsl(var(--foreground)/0.45)] dark:border-white/10 dark:bg-background/25">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                    {trace.node}
+                  </p>
+                  <p className="text-sm text-foreground/90">{trace.summary}</p>
+                </article>
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 top-3 h-0 w-0 -translate-x-full border-y-[8px] border-y-transparent border-r-[10px] border-r-white/35 dark:border-r-white/10"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 top-[18px] h-0 w-0 -translate-x-full border-y-[6px] border-y-transparent border-r-[8px] border-r-background/58 dark:border-r-background/25"
+                />
+              </div>
             ))}
           </motion.div>
         ) : (

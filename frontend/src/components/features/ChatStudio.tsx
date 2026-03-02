@@ -35,8 +35,8 @@ export function ChatStudio() {
   const layoutStyles = useMemo(
     () =>
       ({
-        "--left-panel": toolPanelOpen ? "19rem" : "3.6rem",
-        "--right-panel": tracePanelOpen ? "21rem" : "3.6rem",
+        "--left-panel": toolPanelOpen ? "18.5rem" : "3.8rem",
+        "--right-panel": tracePanelOpen ? "20.5rem" : "3.8rem",
       }) as CSSProperties,
     [toolPanelOpen, tracePanelOpen],
   )
@@ -85,7 +85,7 @@ export function ChatStudio() {
   return (
     <section
       style={layoutStyles}
-      className="grid h-full min-h-0 grid-cols-1 overflow-hidden lg:[grid-template-columns:var(--left-panel)_minmax(0,1fr)_var(--right-panel)] lg:transition-[grid-template-columns] lg:duration-300 lg:ease-out"
+      className="grid h-full min-h-0 grid-cols-1 gap-3 overflow-hidden px-3 py-3 lg:[grid-template-columns:var(--left-panel)_minmax(0,1fr)_var(--right-panel)] lg:transition-[grid-template-columns] lg:duration-300 lg:ease-out"
     >
       <StudioToolsSidebar
         isOpen={toolPanelOpen}

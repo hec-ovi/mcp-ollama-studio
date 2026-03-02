@@ -35,7 +35,7 @@ export function StudioChatPanel({
   }
 
   return (
-    <article className="flex h-full min-h-0 flex-col border-x border-border/75 bg-panel/72 p-4 md:px-5 md:py-4">
+    <article className="glass-widget flex h-full min-h-0 flex-col p-4 md:px-5 md:py-4">
       <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-semibold">Agent Console</h2>
@@ -46,7 +46,7 @@ export function StudioChatPanel({
         <button
           type="button"
           onClick={onClearConversation}
-          className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground transition hover:border-rose-400/50 hover:text-rose-300"
+          className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-background/55 px-3 py-1.5 text-xs text-muted-foreground transition hover:border-rose-400/50 hover:text-rose-300 dark:border-white/10 dark:bg-background/25"
         >
           <Trash2 size={14} />
           Clear
@@ -55,10 +55,10 @@ export function StudioChatPanel({
 
       <section
         ref={chatViewportRef}
-        className="studio-scrollbar mb-4 min-h-0 flex-1 space-y-3 overflow-y-auto border border-border/70 bg-background/60 p-3"
+        className="studio-scrollbar mb-4 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain rounded-xl border border-white/35 bg-background/48 p-3 dark:border-white/10 dark:bg-background/20"
       >
         {messages.length === 0 && (
-          <div className="border border-dashed border-border/70 bg-background/70 p-4 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed border-white/35 bg-background/62 p-4 text-sm text-muted-foreground dark:border-white/10 dark:bg-background/24">
             Ask something that can prove MCP calls quickly, for example:
             <ul className="mt-2 list-disc space-y-1 pl-5 text-foreground/90">
               {starterPrompts.map((prompt) => (
@@ -78,8 +78,8 @@ export function StudioChatPanel({
             <article
               className={`rounded-2xl border px-3 py-2 text-sm leading-relaxed ${
                 message.role === "user"
-                  ? "border-primary/30 bg-primary/10"
-                  : "border-border/70 bg-background"
+                  ? "border-primary/35 bg-primary/14"
+                  : "border-white/35 bg-background/72 dark:border-white/10 dark:bg-background/40"
               }`}
             >
               <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -91,14 +91,29 @@ export function StudioChatPanel({
                 <p className="whitespace-pre-wrap">{message.content || "..."}</p>
               )}
             </article>
-            <span
-              aria-hidden
-              className={`absolute top-3 h-3 w-3 rotate-45 border ${
-                message.role === "user"
-                  ? "right-1 border-b-0 border-l-0 border-primary/30 bg-primary/10"
-                  : "left-1 border-r-0 border-t-0 border-border/70 bg-background"
-              }`}
-            />
+            {message.role === "user" ? (
+              <>
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute right-0 top-3 h-0 w-0 translate-x-full border-y-[8px] border-y-transparent border-l-[10px] border-l-primary/35"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute right-px top-[18px] h-0 w-0 translate-x-full border-y-[6px] border-y-transparent border-l-[8px] border-l-primary/14"
+                />
+              </>
+            ) : (
+              <>
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 top-3 h-0 w-0 -translate-x-full border-y-[8px] border-y-transparent border-r-[10px] border-r-white/35 dark:border-r-white/10"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 top-[18px] h-0 w-0 -translate-x-full border-y-[6px] border-y-transparent border-r-[8px] border-r-background/72 dark:border-r-background/40"
+                />
+              </>
+            )}
           </div>
         ))}
       </section>
@@ -111,7 +126,7 @@ export function StudioChatPanel({
           </div>
         )}
 
-        <div className="relative flex h-12 items-center overflow-hidden rounded-r-3xl border border-border/70 bg-background/70">
+        <div className="relative flex h-12 items-center overflow-hidden rounded-r-3xl border border-white/35 bg-background/55 backdrop-blur-sm dark:border-white/10 dark:bg-background/25">
           <input
             type="text"
             value={draft}

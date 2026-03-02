@@ -7,10 +7,15 @@ function App() {
   useApplyTheme()
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,hsl(var(--primary)/0.2),transparent_35%),radial-gradient(circle_at_90%_0%,hsl(var(--accent)/0.18),transparent_40%),radial-gradient(circle_at_50%_100%,hsl(var(--secondary)/0.15),transparent_35%)]" />
+    <div className="relative h-screen overflow-hidden bg-background text-foreground">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="ambient-orb ambient-orb-a" />
+        <div className="ambient-orb ambient-orb-b" />
+        <div className="ambient-orb ambient-orb-c" />
+        <div className="absolute inset-0 bg-[linear-gradient(140deg,hsl(var(--background)/0.55),hsl(var(--background)/0.88)_55%,hsl(var(--background)/0.62))]" />
+      </div>
 
-      <div className="relative flex min-h-screen w-full flex-col">
+      <div className="relative flex h-full w-full flex-col">
         <Header />
         <MainContent />
         <Footer />
