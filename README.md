@@ -57,12 +57,13 @@ Single-page shell layout with full-height, responsive workspace sections:
 
 - Sticky header with nav + theme toggle (system/light/dark)
 - Studio view uses a **three-pane layout**:
-  - left full-height MCP tool/server selection rail
+  - left full-height MCP tool/server selection rail (independent sidebar component)
   - center full-height streaming chat workspace
-  - right full-height **collapsible** reasoning trace rail
+  - right full-height **collapsible** reasoning trace rail (independent sidebar component)
 - Markdown answers (tables/code/quotes) with styled rendering
 - Collapsible `Thinking` section when model emits `<think>...</think>` or reasoning fences
 - Auto-scroll while responses stream so the latest assistant output stays in view
+- Custom themed scrollbars for chat and side rails (light/dark aware)
 - MCP status dashboard
 - Footer links to `/docs`, `/redoc`, `/openapi.json`
 

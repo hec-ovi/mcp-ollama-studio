@@ -56,6 +56,41 @@ body {
   color: hsl(var(--foreground));
 }
 
+.studio-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.6) hsl(var(--panel) / 0.55);
+}
+
+.studio-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.studio-scrollbar::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: hsl(var(--panel) / 0.55);
+}
+
+.studio-scrollbar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    hsl(var(--primary) / 0.88),
+    hsl(var(--secondary) / 0.8)
+  );
+  background-clip: content-box;
+}
+
+.studio-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--primary) / 0.96),
+    hsl(var(--secondary) / 0.92)
+  );
+  background-clip: content-box;
+}
+
 .markdown-content :is(h1, h2, h3, h4) {
   margin-top: 0.8rem;
   margin-bottom: 0.5rem;

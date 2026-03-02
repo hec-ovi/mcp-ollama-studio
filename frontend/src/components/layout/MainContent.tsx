@@ -11,12 +11,14 @@ const VIEW_MAP = {
 
 export function MainContent() {
   const currentView = useNavigationStore((state) => state.currentView)
+  const isStudioView = currentView === "studio"
 
   return (
-    <main className="mt-5 flex-1">
+    <main className="mt-3 flex min-h-0 flex-1">
       <AnimatePresence mode="wait">
         <motion.section
           key={currentView}
+          className={`w-full ${isStudioView ? "min-h-0 flex-1" : ""}`}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
