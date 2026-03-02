@@ -1,1 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
 @import "tailwindcss";
+
+:root {
+  --background: 44 34% 96%;
+  --foreground: 222 39% 12%;
+  --muted-foreground: 220 16% 38%;
+  --panel: 41 48% 91%;
+  --border: 31 22% 77%;
+  --primary: 189 87% 34%;
+  --primary-foreground: 44 34% 97%;
+  --secondary: 29 78% 54%;
+  --accent: 152 48% 41%;
+}
+
+.dark {
+  --background: 222 38% 8%;
+  --foreground: 41 27% 92%;
+  --muted-foreground: 213 15% 66%;
+  --panel: 224 28% 13%;
+  --border: 220 14% 28%;
+  --primary: 189 82% 51%;
+  --primary-foreground: 220 42% 8%;
+  --secondary: 32 87% 58%;
+  --accent: 152 59% 50%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-panel: hsl(var(--panel));
+  --color-border: hsl(var(--border));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-accent: hsl(var(--accent));
+  --font-display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  --font-sans: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+* {
+  @apply border-border;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}

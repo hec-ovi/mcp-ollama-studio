@@ -1,34 +1,21 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Footer } from "./components/layout/Footer"
+import { Header } from "./components/layout/Header"
+import { MainContent } from "./components/layout/MainContent"
+import { useApplyTheme } from "./hooks/useApplyTheme"
 
 function App() {
-  const [count, setCount] = useState(0)
+  useApplyTheme()
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,hsl(var(--primary)/0.2),transparent_35%),radial-gradient(circle_at_90%_0%,hsl(var(--accent)/0.18),transparent_40%),radial-gradient(circle_at_50%_100%,hsl(var(--secondary)/0.15),transparent_35%)]" />
+
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 pb-4 pt-4 md:px-6">
+        <Header />
+        <MainContent />
+        <Footer />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
