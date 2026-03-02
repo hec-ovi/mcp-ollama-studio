@@ -23,12 +23,12 @@ class Settings(BaseSettings):
     )
 
     llm_base_url: str = Field(
-        default="http://host.docker.internal:11434/v1",
+        default="http://ollama:11434/v1",
         validation_alias=AliasChoices("LLM_BASE_URL", "OLLAMA_BASE_URL"),
         description="OpenAI-compatible base URL.",
     )
     llm_model: str = Field(
-        default="qwen2.5:3b-instruct",
+        default="gpt-oss:20b",
         validation_alias=AliasChoices("LLM_MODEL", "OLLAMA_MODEL"),
         description="Default model name used by the chat adapter.",
     )

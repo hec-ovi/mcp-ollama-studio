@@ -4,7 +4,7 @@ A local-first MCP client stack for demos and production-ready iteration.
 
 - Backend: `FastAPI + LangGraph + langchain-mcp-adapters`
 - Frontend: `React 19 + Tailwind v4 + Framer Motion + TanStack Query + Zustand`
-- LLM adapter: **OpenAI-compatible `v1`** (default wired to local Ollama)
+- LLM adapter: **OpenAI-compatible `v1`** (default wired to in-compose Ollama ROCm)
 - Docs: OpenAPI + Swagger + ReDoc
 - Deployment: Docker Compose with separated frontend/backend services
 
@@ -14,7 +14,7 @@ This project is optimized for fast, credible demos:
 
 - real MCP integration (no mock MCP behavior)
 - streaming completions + reasoning trace feed
-- easy provider switch via `.env` (local Ollama, OpenAI-compatible endpoints, OpenRouter)
+- easy provider switch via `.env` (in-compose Ollama, OpenAI-compatible endpoints, OpenRouter)
 - polished UI with system/light/dark theme cycle
 
 ## MCP Servers Included (No Auth)
@@ -75,7 +75,7 @@ LLM_MODEL=
 
 Examples:
 
-- Local Ollama (default): `LLM_BASE_URL=http://host.docker.internal:11434/v1`
+- In-compose Ollama (default): `LLM_BASE_URL=http://ollama:11434/v1`
 - OpenAI-compatible provider: set provider base URL + key
 - OpenRouter: set OpenRouter base URL + key + model
 
@@ -86,6 +86,7 @@ cp .env.template .env
 ```
 
 Main variables are documented in [`.env.template`](.env.template).
+Make sure `OLLAMA_MODELS_DIR` points to your host models folder (for your setup: `/home/hector/models/ollama`).
 
 ## Local Dev
 
@@ -94,6 +95,8 @@ Main variables are documented in [`.env.template`](.env.template).
 ```bash
 cd backend
 UV_CACHE_DIR=/tmp/uv-cache uv sync --frozen
+# If running backend on host instead of compose:
+# export LLM_BASE_URL=http://localhost:11434/v1
 UV_CACHE_DIR=/tmp/uv-cache uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -109,11 +112,13 @@ npm run dev
 
 ```bash
 cp .env.template .env
+mkdir -p /home/hector/models/ollama
 docker compose up --build
 ```
 
 Services:
 
+- Ollama API: `http://localhost:11434`
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:8000`
 - Swagger: `http://localhost:8000/docs`

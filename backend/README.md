@@ -10,6 +10,8 @@ FastAPI + LangGraph backend for MCP Ollama Studio.
 - Reasoning trace events
 - OpenAI-compatible v1 LLM adapter
 
+Default compose target: `LLM_BASE_URL=http://ollama:11434/v1`.
+
 ## Commands
 
 ```bash
