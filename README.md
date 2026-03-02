@@ -1,35 +1,95 @@
 # MCP Ollama Studio
 
-Local-first MCP client stack designed for fast demos: a LangGraph agent backend, OpenAPI + ReDoc docs, and a polished frontend shell for streaming completions.
+A local-first MCP client stack for demos and production-ready iteration.
 
-## Progress
+- Backend: `FastAPI + LangGraph + langchain-mcp-adapters`
+- Frontend: `React 19 + Tailwind v4 + Framer Motion + TanStack Query + Zustand`
+- LLM adapter: **OpenAI-compatible `v1`** (default wired to local Ollama)
+- Docs: OpenAPI + Swagger + ReDoc
+- Deployment: Docker Compose with separated frontend/backend services
 
-- [x] Backend foundation (FastAPI + LangGraph + MCP adapters)
-- [ ] Frontend polished shell and chat experience
-- [ ] Docker compose orchestration
-- [ ] Full runbook and demo scripts
+## Why This Repo
 
-## Backend Implemented
+This project is optimized for fast, credible demos:
 
-- FastAPI app with OpenAPI at `/openapi.json`, Swagger at `/docs`, ReDoc at `/redoc`
-- Chat completion endpoint: `POST /api/v1/chat/completions`
-  - `stream=false` returns JSON completion
-  - `stream=true` returns SSE chunks + trace events
-- MCP status endpoint: `GET /api/v1/mcp/servers`
-- LangGraph + `langchain-mcp-adapters` tool orchestration
-- OpenAI-compatible `v1` LLM adapter (default targets local Ollama `http://host.docker.internal:11434/v1`)
+- real MCP integration (no mock MCP behavior)
+- streaming completions + reasoning trace feed
+- easy provider switch via `.env` (local Ollama, OpenAI-compatible endpoints, OpenRouter)
+- polished UI with system/light/dark theme cycle
 
-## MCP Servers (No Auth)
+## MCP Servers Included (No Auth)
 
-The backend loads MCP server schemas from `backend/src/core/mcp_servers/`:
+Schemas are separated by server under [`backend/src/core/mcp_servers`](backend/src/core/mcp_servers):
 
 - `01-deepwiki.json`
 - `02-fetch.json`
 - `03-time.json`
 
-Each server has separated schema + usage instructions, so you can swap or add MCPs without editing service code.
+Each schema contains:
 
-## Quick Backend Dev Run
+- transport config (`streamable_http` or `stdio`)
+- purpose/description
+- explicit usage instructions for the agent
+
+## Architecture
+
+### Backend
+
+`Route -> Service -> Tool`
+
+- `GET /health`
+- `GET /api/v1/mcp/servers`
+- `POST /api/v1/chat/completions`
+  - `stream=false`: JSON completion
+  - `stream=true`: SSE chunks + `trace` events
+
+Core backend modules:
+
+- `backend/src/routes/`
+- `backend/src/services/`
+- `backend/src/models/`
+- `backend/src/tools/`
+- `backend/src/prompts/`
+
+### Frontend
+
+Single-page shell layout with semantic sections:
+
+- Sticky header with nav + theme toggle (system/light/dark)
+- Main panel with animated view transitions
+- Streaming chat console + reasoning trace panel
+- MCP status dashboard
+- Footer links to `/docs`, `/redoc`, `/openapi.json`
+
+## LLM Provider Switching (OpenAI-Compatible v1)
+
+The backend uses an OpenAI-compatible chat adapter.
+
+Set these values in `.env`:
+
+```bash
+LLM_BASE_URL=
+LLM_API_KEY=
+LLM_MODEL=
+```
+
+Examples:
+
+- Local Ollama (default): `LLM_BASE_URL=http://host.docker.internal:11434/v1`
+- OpenAI-compatible provider: set provider base URL + key
+- OpenRouter: set OpenRouter base URL + key + model
+
+## Environment Setup
+
+```bash
+cp .env.template .env
+```
+
+Main variables are documented in [`.env.template`](.env.template).
+
+## Local Dev
+
+### Backend
 
 ```bash
 cd backend
@@ -37,10 +97,57 @@ UV_CACHE_DIR=/tmp/uv-cache uv sync --frozen
 UV_CACHE_DIR=/tmp/uv-cache uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Docker Run
+
+```bash
+cp .env.template .env
+docker compose up --build
+```
+
+Services:
+
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:8000`
+- Swagger: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+## Validation Checklist
+
+1. Open `http://localhost:5173`
+2. Confirm MCP cards are visible and reporting status
+3. Send a streaming prompt in Studio view
+4. Watch reasoning trace events appear in real time
+5. Open backend docs at `/docs` and `/redoc`
+
+## Demo Prompts
+
+- `Use Time MCP and tell me current time in Tokyo and New York.`
+- `Use Fetch MCP and summarize https://modelcontextprotocol.io in 4 bullets.`
+- `Use DeepWiki MCP and explain this repo: langchain-ai/langgraph.`
+
 ## Tests
+
+### Backend
 
 ```bash
 cd backend
 UV_CACHE_DIR=/tmp/uv-cache uv run ruff check src tests
 UV_CACHE_DIR=/tmp/uv-cache uv run pytest -q
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run lint
+npm run test
+npm run build
 ```

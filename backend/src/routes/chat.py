@@ -15,7 +15,7 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 async def create_chat_completion(
     request: ChatCompletionRequest,
     chat_service: Annotated[ChatService, Depends(get_chat_service)],
-) -> ChatCompletionResponse | StreamingResponse:
+) -> ChatCompletionResponse:
     """Create a completion response, optionally as SSE stream."""
     try:
         if request.stream:

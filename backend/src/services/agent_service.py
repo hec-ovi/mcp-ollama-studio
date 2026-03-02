@@ -84,7 +84,8 @@ class AgentService:
                 stream_mode=["messages", "updates"],
             ):
                 if mode == "messages":
-                    yield from self._stream_message_chunk(chunk)
+                    for event in self._stream_message_chunk(chunk):
+                        yield event
                     continue
 
                 if mode == "updates":
