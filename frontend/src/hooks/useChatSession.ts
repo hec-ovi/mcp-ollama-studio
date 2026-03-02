@@ -20,7 +20,7 @@ interface ChatSessionResult {
   traces: ReasoningStep[]
   isRunning: boolean
   error: string | null
-  sendMessage: (content: string, options: SendMessageOptions) => Promise<void>
+  sendMessage: (content: string, options: SendMessageOptions) => Promise<boolean>
   clearConversation: () => void
 }
 
@@ -41,7 +41,7 @@ export function useChatSession(): ChatSessionResult {
   const sendMessage = useCallback(
     async (content: string, options: SendMessageOptions) => {
       if (!content.trim()) {
-        return
+        return false
       }
 
       const userMessage: ChatMessage = { role: "user", content }
@@ -101,7 +101,7 @@ export function useChatSession(): ChatSessionResult {
               )
             }
           }
-          return
+          return receivedToken && !streamReportedError
         }
 
         const response = await createCompletion(request)
@@ -112,6 +112,7 @@ export function useChatSession(): ChatSessionResult {
           { role: "assistant", content: answer },
         ])
         setTraces(response.reasoning_trace)
+        return answer.trim().length > 0
       } catch (err) {
         setMessages((previous) => removeTrailingEmptyAssistant(previous))
         setError(
@@ -119,6 +120,7 @@ export function useChatSession(): ChatSessionResult {
             ? err.message
             : "Unexpected error while generating completion.",
         )
+        return false
       } finally {
         setIsRunning(false)
       }
