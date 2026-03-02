@@ -33,15 +33,15 @@ export function StudioChatPanel({
   onDraftChange,
   onStreamEnabledChange,
 }: StudioChatPanelProps) {
-  const onPromptKeyDown = async (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+  const onPromptKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
       event.preventDefault()
       await onSubmit()
     }
   }
 
   return (
-    <article className="h-full min-h-0 rounded-2xl border border-border/70 bg-panel/70 p-4 shadow-xl shadow-black/10">
+    <article className="flex h-full min-h-0 flex-col border-x border-border/75 bg-panel/72 p-4 md:px-5 md:py-4">
       <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-semibold">Agent Console</h2>
@@ -61,10 +61,10 @@ export function StudioChatPanel({
 
       <section
         ref={chatViewportRef}
-        className="studio-scrollbar mb-4 h-[calc(100%-12.2rem)] min-h-0 space-y-3 overflow-y-auto rounded-xl border border-border/70 bg-background/60 p-3"
+        className="studio-scrollbar mb-4 min-h-0 flex-1 space-y-3 overflow-y-auto border border-border/70 bg-background/60 p-3"
       >
         {messages.length === 0 && (
-          <div className="rounded-xl border border-dashed border-border/70 bg-background/70 p-4 text-sm text-muted-foreground">
+          <div className="border border-dashed border-border/70 bg-background/70 p-4 text-sm text-muted-foreground">
             Ask something that can prove MCP calls quickly, for example:
             <ul className="mt-2 list-disc space-y-1 pl-5 text-foreground/90">
               {starterPrompts.map((prompt) => (
@@ -77,7 +77,7 @@ export function StudioChatPanel({
         {messages.map((message, index) => (
           <article
             key={`${message.role}-${index}`}
-            className={`rounded-xl border px-3 py-2 text-sm leading-relaxed ${
+            className={`border px-3 py-2 text-sm leading-relaxed ${
               message.role === "user"
                 ? "ml-6 border-primary/30 bg-primary/10"
                 : "mr-6 border-border/70 bg-background"
@@ -119,13 +119,14 @@ export function StudioChatPanel({
           )}
         </div>
 
-        <div className="relative">
-          <textarea
+        <div className="relative flex h-12 items-center overflow-hidden rounded-r-3xl border border-border/70 bg-background/70">
+          <input
+            type="text"
             value={draft}
             onChange={(event) => onDraftChange(event.target.value)}
             onKeyDown={onPromptKeyDown}
             placeholder="Ask the local MCP agent..."
-            className="studio-scrollbar min-h-28 w-full resize-none rounded-2xl border border-border/70 bg-background/70 px-3 py-2 pr-16 text-sm outline-none transition focus:border-primary"
+            className="h-full w-full bg-transparent px-3 pr-16 text-sm outline-none placeholder:text-muted-foreground/80"
           />
           <button
             type="button"
@@ -133,7 +134,7 @@ export function StudioChatPanel({
               void onSubmit()
             }}
             disabled={isRunning || !draft.trim()}
-            className="absolute bottom-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-55"
+            className="absolute right-2 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-55"
             aria-label="Send message"
             title="Send"
           >

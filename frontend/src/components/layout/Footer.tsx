@@ -6,7 +6,7 @@ export function Footer() {
   const apiBase = getApiBaseUrl()
 
   return (
-    <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border/70 py-4 text-xs text-muted-foreground">
+    <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border/80 bg-background/70 px-4 py-3 text-xs text-muted-foreground md:px-6">
       <span>© {year} MCP Ollama Studio</span>
       <div className="flex items-center gap-3">
         <a

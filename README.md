@@ -1,113 +1,169 @@
 # MCP Ollama Studio
 
-A local-first MCP client stack for demos and production-ready iteration.
+Local-first MCP client with a LangGraph agent, OpenAI-compatible `v1` completion interface, and a Dockerized ROCm Ollama inference stack.
 
-- Backend: `FastAPI + LangGraph + langchain-mcp-adapters`
-- Frontend: `React 19 + Tailwind v4 + Framer Motion + TanStack Query + Zustand`
-- LLM adapter: **OpenAI-compatible `v1`** (default wired to in-compose Ollama ROCm)
-- Docs: OpenAPI + Swagger + ReDoc
-- Deployment: Docker Compose with separated frontend/backend services
+## Current Stack
 
-## Why This Repo
+This repo currently runs **3 containers**:
 
-This project is optimized for fast, credible demos:
+1. `ollama` (ROCm image + mounted host models)
+2. `backend` (FastAPI + LangGraph + MCP adapters)
+3. `frontend` (React app served by Nginx)
 
-- real MCP integration (no mock MCP behavior)
-- streaming completions + reasoning trace feed
-- easy provider switch via `.env` (in-compose Ollama, OpenAI-compatible endpoints, OpenRouter)
-- polished UI with system/light/dark theme cycle
+## What Is Implemented
 
-## MCP Servers Included (No Auth)
+- LangGraph ReAct agent orchestration with MCP tools
+- OpenAI-compatible completion endpoint (`/api/v1/chat/completions`)
+- Streaming SSE with token chunks + `trace` events + `[DONE]`
+- MCP registry loaded from separated JSON schemas
+- Default no-auth MCP set:
+  - DeepWiki (streamable HTTP)
+  - Fetch (stdio)
+  - Time (stdio)
+- Frontend Studio with:
+  - full-height left tools rail
+  - full-height center chat workspace
+  - full-height right collapsible reasoning rail
+  - markdown answer rendering
+  - collapsible model thinking blocks
+  - themed custom scrollbars
+  - streaming auto-scroll
+- OpenAPI docs, Swagger, ReDoc
 
-Schemas are separated by server under [`backend/src/core/mcp_servers`](backend/src/core/mcp_servers):
+## Repository Structure
 
-- `01-deepwiki.json`
-- `02-fetch.json`
-- `03-time.json`
+```text
+.
+├── docker-compose.yml
+├── .env.template
+├── ollama/
+│   ├── Dockerfile
+│   └── entrypoint.sh
+├── backend/
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   ├── src/
+│   │   ├── main.py
+│   │   ├── core/
+│   │   │   ├── settings.py
+│   │   │   └── mcp_servers/
+│   │   │       ├── 01-deepwiki.json
+│   │   │       ├── 02-fetch.json
+│   │   │       └── 03-time.json
+│   │   ├── routes/
+│   │   │   ├── health.py
+│   │   │   ├── mcp.py
+│   │   │   └── chat.py
+│   │   ├── services/
+│   │   │   ├── mcp_registry_service.py
+│   │   │   ├── agent_service.py
+│   │   │   └── chat_service.py
+│   │   ├── models/
+│   │   │   ├── mcp.py
+│   │   │   └── chat.py
+│   │   ├── tools/
+│   │   │   ├── llm_client_factory.py
+│   │   │   └── prompt_loader.py
+│   │   └── prompts/
+│   │       └── system_prompt.md
+│   └── tests/
+│       ├── test_message_utils.py
+│       └── test_mcp_registry_service.py
+└── frontend/
+    ├── Dockerfile
+    ├── src/
+    │   ├── App.tsx
+    │   ├── components/
+    │   │   ├── layout/
+    │   │   ├── features/
+    │   │   │   ├── ChatStudio.tsx
+    │   │   │   └── studio/
+    │   │   │       ├── StudioToolsSidebar.tsx
+    │   │   │       ├── StudioChatPanel.tsx
+    │   │   │       └── StudioReasoningSidebar.tsx
+    │   │   └── ui/
+    │   ├── services/
+    │   ├── hooks/
+    │   ├── lib/
+    │   ├── stores/
+    │   └── types/
+    └── nginx.conf
+```
 
-Each schema contains:
+## Inference + Agent Flow
 
-- transport config (`streamable_http` or `stdio`)
-- purpose/description
-- explicit usage instructions for the agent
+`Frontend -> FastAPI /api/v1/chat/completions -> ChatService -> AgentService -> LangGraph create_react_agent -> MCP tools + ChatOpenAI-compatible model -> SSE back to frontend`
 
-## Architecture
+LLM adapter is provider-agnostic as long as endpoint is OpenAI-compatible (`/v1` semantics).
 
-### Backend
-
-`Route -> Service -> Tool`
+## API Endpoints
 
 - `GET /health`
 - `GET /api/v1/mcp/servers`
 - `POST /api/v1/chat/completions`
-  - `stream=false`: JSON completion
-  - `stream=true`: SSE chunks + `trace` events (ISO-8601 serialized timestamps)
+  - `stream=false`: JSON response with `choices` + `reasoning_trace`
+  - `stream=true`: `text/event-stream`
+    - `event: trace` + JSON trace payload
+    - `data: {chat.completion.chunk}` token chunks
+    - `data: [DONE]`
 
-Core backend modules:
+Docs:
 
-- `backend/src/routes/`
-- `backend/src/services/`
-- `backend/src/models/`
-- `backend/src/tools/`
-- `backend/src/prompts/`
+- Swagger: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+- OpenAPI JSON: `http://localhost:8000/openapi.json`
 
-### Frontend
+## MCP Schema Catalog
 
-Single-page shell layout with full-height, responsive workspace sections:
+Each MCP server config is defined in its own schema file under `backend/src/core/mcp_servers/`.
 
-- Sticky header with nav + theme toggle (system/light/dark)
-- Studio view uses a **three-pane layout**:
-  - left full-height MCP tool/server selection rail (independent sidebar component)
-  - center full-height streaming chat workspace
-  - right full-height **collapsible** reasoning trace rail (independent sidebar component)
-- Markdown answers (tables/code/quotes) with styled rendering
-- Collapsible `Thinking` section when model emits `<think>...</think>` or reasoning fences
-- Auto-scroll while responses stream so the latest assistant output stays in view
-- Custom themed scrollbars for chat and side rails (light/dark aware)
-- MCP status dashboard
-- Footer links to `/docs`, `/redoc`, `/openapi.json`
+Each schema includes:
 
-## LLM Provider Switching (OpenAI-Compatible v1)
+- identity (`name`, `label`)
+- transport (`streamable_http` or `stdio`)
+- runtime config (`url` or `command/args/env`)
+- human-facing `instructions` used by the agent
 
-The backend uses an OpenAI-compatible chat adapter.
-Both streaming and non-streaming endpoints resolve the model from `LLM_MODEL` unless overridden per request.
+## Environment
 
-Set these values in `.env`:
-
-```bash
-LLM_BASE_URL=
-LLM_API_KEY=
-LLM_MODEL=
-```
-
-Examples:
-
-- In-compose Ollama (default): `LLM_BASE_URL=http://ollama:11434/v1`
-- OpenAI-compatible provider: set provider base URL + key
-- OpenRouter: set OpenRouter base URL + key + model
-
-## Environment Setup
+Copy and edit:
 
 ```bash
 cp .env.template .env
 ```
 
-Main variables are documented in [`.env.template`](.env.template).
-Make sure `OLLAMA_MODELS_DIR` points to your host models folder (for your setup: `/home/hector/models/ollama`).
+Required values in this project:
 
-## Local Dev
+- `OLLAMA_MODELS_DIR` (host path mount, example: `/home/hector/models/ollama`)
+- `OLLAMA_MODEL`
+- `LLM_BASE_URL` (default: `http://ollama:11434/v1`)
+- `LLM_API_KEY` (default for local compose: `ollama`)
+- `LLM_MODEL`
+- `VITE_API_BASE_URL` (default: `http://localhost:8000`)
 
-### Backend
+## Run (Docker Compose)
+
+```bash
+docker compose up --build
+```
+
+Service URLs:
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8000`
+- Ollama API: `http://localhost:11434`
+
+## Dev Commands
+
+Backend:
 
 ```bash
 cd backend
 UV_CACHE_DIR=/tmp/uv-cache uv sync --frozen
-# If running backend on host instead of compose:
-# export LLM_BASE_URL=http://localhost:11434/v1
 UV_CACHE_DIR=/tmp/uv-cache uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Frontend
+Frontend:
 
 ```bash
 cd frontend
@@ -115,40 +171,9 @@ npm install
 npm run dev
 ```
 
-## Docker Run
+## Tests and Quality
 
-```bash
-cp .env.template .env
-mkdir -p /home/hector/models/ollama
-docker compose up --build
-```
-
-Services:
-
-- Ollama API: `http://localhost:11434`
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:8000`
-- Swagger: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-## Validation Checklist
-
-1. Open `http://localhost:5173`
-2. Confirm MCP cards are visible and reporting status
-3. In Studio, select MCP servers from the left rail and send a streaming prompt
-4. Confirm chat auto-scrolls while streaming and reasoning trace appears on the right rail
-5. Toggle the right rail collapse/expand control and verify trace persistence
-6. Open backend docs at `/docs` and `/redoc`
-
-## Demo Prompts
-
-- `Use Time MCP and tell me current time in Tokyo and New York.`
-- `Use Fetch MCP and summarize https://modelcontextprotocol.io in 4 bullets.`
-- `Use DeepWiki MCP and explain this repo: langchain-ai/langgraph.`
-
-## Tests
-
-### Backend
+Backend:
 
 ```bash
 cd backend
@@ -156,7 +181,7 @@ UV_CACHE_DIR=/tmp/uv-cache uv run ruff check src tests
 UV_CACHE_DIR=/tmp/uv-cache uv run pytest -q
 ```
 
-### Frontend
+Frontend:
 
 ```bash
 cd frontend
@@ -164,3 +189,18 @@ npm run lint
 npm run test
 npm run build
 ```
+
+## Demo Prompts
+
+- `Use Time MCP and tell me current time in Tokyo and New York.`
+- `Use Fetch MCP and summarize https://modelcontextprotocol.io in 4 bullets.`
+- `Use DeepWiki MCP and explain this repo: langchain-ai/langgraph.`
+
+## UI Validation Checklist
+
+1. Open `http://localhost:5173`
+2. Confirm the left tools rail is full-height and can collapse/expand
+3. Confirm the right reasoning rail is full-height and can collapse/expand
+4. Send a prompt and verify streaming tokens + trace events
+5. Confirm the composer stays inside the center chat panel at all times
+6. Verify footer links to `/docs`, `/redoc`, `/openapi.json`

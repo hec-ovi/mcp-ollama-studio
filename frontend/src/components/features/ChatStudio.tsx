@@ -17,28 +17,40 @@ export function ChatStudio() {
   const { messages, traces, isRunning, error, sendMessage, clearConversation } =
     useChatSession()
 
-  const [draft, setDraft] = useState(STARTER_PROMPTS[0])
+  const [draft, setDraft] = useState("")
   const [streamEnabled, setStreamEnabled] = useState(true)
   const [selectedServers, setSelectedServers] = useState<string[]>([])
   const [toolPanelOpen, setToolPanelOpen] = useState(true)
   const [tracePanelOpen, setTracePanelOpen] = useState(true)
 
   const availableServers = useMemo(() => data?.servers ?? [], [data])
+  const enabledServerNames = useMemo(
+    () => availableServers.filter((server) => server.enabled).map((server) => server.name),
+    [availableServers],
+  )
+  const effectiveSelectedServers = useMemo(
+    () => (selectedServers.length === 0 ? enabledServerNames : selectedServers),
+    [enabledServerNames, selectedServers],
+  )
   const chatViewportRef = useRef<HTMLElement | null>(null)
   const layoutStyles = useMemo(
     () =>
       ({
-        "--left-panel": toolPanelOpen ? "18rem" : "3.5rem",
-        "--right-panel": tracePanelOpen ? "20rem" : "3.5rem",
+        "--left-panel": toolPanelOpen ? "19rem" : "3.6rem",
+        "--right-panel": tracePanelOpen ? "21rem" : "3.6rem",
       }) as CSSProperties,
     [toolPanelOpen, tracePanelOpen],
   )
 
   const toggleServer = (name: string) => {
     setSelectedServers((previous) =>
-      previous.includes(name)
-        ? previous.filter((item) => item !== name)
-        : [...previous, name],
+      (previous.length === 0 ? enabledServerNames : previous).includes(name)
+        ? (() => {
+            const base = previous.length === 0 ? enabledServerNames : previous
+            const next = base.filter((item) => item !== name)
+            return next.length === 0 ? base : next
+          })()
+        : [...(previous.length === 0 ? enabledServerNames : previous), name],
     )
   }
 
@@ -50,7 +62,7 @@ export function ChatStudio() {
 
     await sendMessage(trimmed, {
       stream: streamEnabled,
-      mcpServers: selectedServers,
+      mcpServers: effectiveSelectedServers,
     })
     setDraft("")
   }
@@ -74,13 +86,13 @@ export function ChatStudio() {
   return (
     <section
       style={layoutStyles}
-      className="grid h-full min-h-0 grid-cols-1 gap-3 lg:[grid-template-columns:var(--left-panel)_minmax(0,1fr)_var(--right-panel)]"
+      className="grid h-full min-h-0 grid-cols-1 overflow-hidden lg:[grid-template-columns:var(--left-panel)_minmax(0,1fr)_var(--right-panel)] lg:transition-[grid-template-columns] lg:duration-300 lg:ease-out"
     >
       <StudioToolsSidebar
         isOpen={toolPanelOpen}
         isLoading={isLoading}
         availableServers={availableServers}
-        selectedServers={selectedServers}
+        selectedServers={effectiveSelectedServers}
         onToggle={() => setToolPanelOpen((previous) => !previous)}
         onToggleServer={toggleServer}
       />
@@ -91,7 +103,7 @@ export function ChatStudio() {
         draft={draft}
         starterPrompts={STARTER_PROMPTS}
         streamEnabled={streamEnabled}
-        selectedServersCount={selectedServers.length}
+        selectedServersCount={effectiveSelectedServers.length}
         isRunning={isRunning}
         error={error}
         onSubmit={onSubmit}
