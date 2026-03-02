@@ -58,6 +58,8 @@ Single-page shell layout with semantic sections:
 - Sticky header with nav + theme toggle (system/light/dark)
 - Main panel with animated view transitions
 - Streaming chat console + reasoning trace panel
+- Markdown answers (tables/code/quotes) with styled rendering
+- Collapsible `Thinking` section when model emits `<think>...</think>` or reasoning fences
 - MCP status dashboard
 - Footer links to `/docs`, `/redoc`, `/openapi.json`
 

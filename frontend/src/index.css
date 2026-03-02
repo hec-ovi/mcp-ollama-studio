@@ -55,3 +55,68 @@ body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
 }
+
+.markdown-content :is(h1, h2, h3, h4) {
+  margin-top: 0.8rem;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.markdown-content :is(p, ul, ol, blockquote, table, pre) {
+  margin-top: 0.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.2rem;
+}
+
+.markdown-content code {
+  border: 1px solid hsl(var(--border) / 0.8);
+  border-radius: 0.35rem;
+  background: hsl(var(--panel) / 0.6);
+  padding: 0.1rem 0.35rem;
+  font-size: 0.86em;
+}
+
+.markdown-content pre {
+  overflow-x: auto;
+  border: 1px solid hsl(var(--border) / 0.8);
+  border-radius: 0.7rem;
+  background: hsl(var(--background) / 0.9);
+  padding: 0.65rem;
+}
+
+.markdown-content pre code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border) / 0.8);
+  border-radius: 0.7rem;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid hsl(var(--border) / 0.75);
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+}
+
+.markdown-content thead {
+  background: hsl(var(--panel) / 0.9);
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  padding-left: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}

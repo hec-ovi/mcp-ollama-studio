@@ -3,6 +3,7 @@ import { LoaderCircle, SendHorizontal, Trash2 } from "lucide-react"
 
 import { useChatSession } from "../../hooks/useChatSession"
 import { useMcpServers } from "../../hooks/useMcpServers"
+import { AssistantMessage } from "../ui/AssistantMessage"
 import { StatusPill } from "../ui/StatusPill"
 
 const STARTER_PROMPTS = [
@@ -87,7 +88,11 @@ export function ChatStudio() {
               <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {message.role}
               </p>
-              <p className="whitespace-pre-wrap">{message.content || "..."}</p>
+              {message.role === "assistant" ? (
+                <AssistantMessage content={message.content} />
+              ) : (
+                <p className="whitespace-pre-wrap">{message.content || "..."}</p>
+              )}
             </article>
           ))}
         </section>

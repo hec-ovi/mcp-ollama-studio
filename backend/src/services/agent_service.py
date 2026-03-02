@@ -105,8 +105,15 @@ class AgentService:
         if not isinstance(metadata, dict):
             return []
 
+        if metadata.get("langgraph_node") == "tools":
+            return []
+
+        message_type = str(getattr(message_chunk, "type", "")).lower()
+        if message_type and message_type not in {"ai", "aimessage", "aimessagechunk"}:
+            return []
+
         node = metadata.get("langgraph_node")
-        if node != "agent":
+        if node not in {"agent", "model", None}:
             return []
 
         text = extract_text_content(getattr(message_chunk, "content", ""))
