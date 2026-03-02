@@ -1,0 +1,10 @@
+{
+  "name": "time",
+  "label": "Time",
+  "description": "Timezone conversion and current-time utilities.",
+  "instructions": "Use for current time, timezone conversion, and calendar-aware timestamp checks.",
+  "transport": "stdio",
+  "command": "python",
+  "args": ["-m", "mcp_server_time", "--local-timezone=UTC"],
+  "enabled": true
+}

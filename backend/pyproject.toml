@@ -1,0 +1,34 @@
+[project]
+name = "mcp-ollama-studio-backend"
+version = "0.1.0"
+description = "FastAPI + LangGraph MCP orchestration backend"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi[standard]>=0.128.0",
+  "httpx>=0.27,<0.28",
+  "langchain>=1.0.3",
+  "langchain-mcp-adapters>=0.1.9",
+  "langchain-openai>=1.0.3",
+  "langgraph>=1.0.2",
+  "mcp-server-fetch>=2025.4.7",
+  "mcp-server-time>=0.6.2",
+  "pydantic-settings>=2.11.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.4.2",
+  "pytest-asyncio>=1.2.0",
+  "ruff>=0.14.2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC", "RUF"]

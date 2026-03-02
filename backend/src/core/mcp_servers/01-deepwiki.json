@@ -1,0 +1,9 @@
+{
+  "name": "deepwiki",
+  "label": "DeepWiki",
+  "description": "Ask questions about public GitHub repositories through DeepWiki.",
+  "instructions": "Use for repository architecture, README interpretation, and codebase explanations for public GitHub repos.",
+  "transport": "streamable_http",
+  "url": "https://mcp.deepwiki.com/mcp",
+  "enabled": true
+}

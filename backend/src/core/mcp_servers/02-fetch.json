@@ -1,0 +1,10 @@
+{
+  "name": "fetch",
+  "label": "Fetch",
+  "description": "Fetch and parse web content without credentials.",
+  "instructions": "Use for pulling and summarizing public URLs, documentation pages, and release notes.",
+  "transport": "stdio",
+  "command": "python",
+  "args": ["-m", "mcp_server_fetch"],
+  "enabled": true
+}
