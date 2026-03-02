@@ -57,7 +57,10 @@ class ChatService:
                 continue
 
             if event.type == StreamEventType.TRACE and event.trace is not None:
-                yield self._format_event_line("trace", event.trace.model_dump())
+                yield self._format_event_line(
+                    "trace",
+                    event.trace.model_dump(mode="json"),
+                )
                 continue
 
             if event.type == StreamEventType.ERROR and event.error is not None:

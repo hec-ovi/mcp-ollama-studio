@@ -41,7 +41,7 @@ Each schema contains:
 - `GET /api/v1/mcp/servers`
 - `POST /api/v1/chat/completions`
   - `stream=false`: JSON completion
-  - `stream=true`: SSE chunks + `trace` events
+  - `stream=true`: SSE chunks + `trace` events (ISO-8601 serialized timestamps)
 
 Core backend modules:
 
