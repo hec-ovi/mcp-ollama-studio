@@ -1,5 +1,11 @@
-import { useMemo, useState } from "react"
-import { LoaderCircle, SendHorizontal, Trash2 } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  LoaderCircle,
+  SendHorizontal,
+  Trash2,
+} from "lucide-react"
 
 import { useChatSession } from "../../hooks/useChatSession"
 import { useMcpServers } from "../../hooks/useMcpServers"
@@ -20,8 +26,10 @@ export function ChatStudio() {
   const [draft, setDraft] = useState(STARTER_PROMPTS[0])
   const [streamEnabled, setStreamEnabled] = useState(true)
   const [selectedServers, setSelectedServers] = useState<string[]>([])
+  const [tracePanelOpen, setTracePanelOpen] = useState(true)
 
   const availableServers = useMemo(() => data?.servers ?? [], [data])
+  const chatViewportRef = useRef<HTMLElement | null>(null)
 
   const toggleServer = (name: string) => {
     setSelectedServers((previous) =>
@@ -44,14 +52,72 @@ export function ChatStudio() {
     setDraft("")
   }
 
+  useEffect(() => {
+    const viewport = chatViewportRef.current
+    if (!viewport) {
+      return
+    }
+
+    viewport.scrollTo({
+      top: viewport.scrollHeight,
+      behavior: "auto",
+    })
+  }, [messages, traces, isRunning])
+
   return (
-    <section className="grid gap-4 lg:grid-cols-[2.2fr,1fr]">
-      <article className="rounded-2xl border border-border/70 bg-panel/70 p-4 shadow-xl shadow-black/10">
+    <section className="grid h-[calc(100vh-13.8rem)] min-h-[560px] gap-4 lg:grid-cols-[280px,minmax(0,1fr),minmax(56px,340px)]">
+      <aside className="h-full min-h-0 rounded-2xl border border-border/70 bg-panel/70 p-4 shadow-xl shadow-black/10">
+        <h3 className="mb-1 font-display text-base font-semibold">Tool Selection</h3>
+        <p className="text-xs text-muted-foreground">
+          Pick specific MCPs or leave all unchecked to use all enabled tools.
+        </p>
+
+        <div className="mt-3 min-h-0 h-[calc(100%-3rem)] overflow-y-auto pr-1">
+          {isLoading && (
+            <p className="mb-2 text-sm text-muted-foreground">Loading MCP servers...</p>
+          )}
+
+          <ul className="space-y-2">
+            {availableServers.map((server) => (
+              <li
+                key={server.name}
+                className="rounded-xl border border-border/70 bg-background/65 p-2"
+              >
+                <label className="flex cursor-pointer items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={selectedServers.includes(server.name)}
+                    onChange={() => toggleServer(server.name)}
+                    className="mt-1 accent-primary"
+                  />
+                  <span>
+                    <span className="mb-1 flex items-center gap-2">
+                      <strong className="font-medium">{server.label}</strong>
+                      <StatusPill
+                        available={server.available}
+                        label={server.available ? "online" : "offline"}
+                      />
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {server.description}
+                    </span>
+                    <span className="mt-1 block text-[11px] text-muted-foreground/80">
+                      {server.instructions}
+                    </span>
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+
+      <article className="h-full min-h-0 rounded-2xl border border-border/70 bg-panel/70 p-4 shadow-xl shadow-black/10">
         <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-lg font-semibold">Agent Console</h2>
             <p className="text-sm text-muted-foreground">
-              Completion endpoint with optional streaming and reasoning traces.
+              Streaming completion with markdown output and trace-aware diagnostics.
             </p>
           </div>
           <button
@@ -64,7 +130,10 @@ export function ChatStudio() {
           </button>
         </header>
 
-        <section className="mb-4 h-[420px] space-y-3 overflow-y-auto rounded-xl border border-border/70 bg-background/60 p-3">
+        <section
+          ref={chatViewportRef}
+          className="mb-4 h-[calc(100%-12.6rem)] min-h-0 space-y-3 overflow-y-auto rounded-xl border border-border/70 bg-background/60 p-3"
+        >
           {messages.length === 0 && (
             <div className="rounded-xl border border-dashed border-border/70 bg-background/70 p-4 text-sm text-muted-foreground">
               Ask something that can prove MCP calls quickly, for example:
@@ -121,19 +190,18 @@ export function ChatStudio() {
             )}
           </div>
 
-          <textarea
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            placeholder="Ask the local MCP agent..."
-            className="min-h-28 w-full resize-none rounded-xl border border-border/70 bg-background/70 px-3 py-2 text-sm outline-none transition focus:border-primary"
-          />
-
-          <div className="flex justify-end">
+          <div className="relative">
+            <textarea
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="Ask the local MCP agent..."
+              className="min-h-28 w-full resize-none rounded-xl border border-border/70 bg-background/70 px-3 py-2 pr-28 text-sm outline-none transition focus:border-primary"
+            />
             <button
               type="button"
               onClick={onSubmit}
               disabled={isRunning || !draft.trim()}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-55"
+              className="absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-55"
             >
               <SendHorizontal size={15} />
               Send
@@ -148,49 +216,24 @@ export function ChatStudio() {
         </footer>
       </article>
 
-      <aside className="space-y-4">
-        <article className="rounded-2xl border border-border/70 bg-panel/70 p-4">
-          <h3 className="mb-3 font-display text-base font-semibold">Tool Selection</h3>
-          {isLoading && (
-            <p className="text-sm text-muted-foreground">Loading MCP servers...</p>
+      <aside className="h-full min-h-0 rounded-2xl border border-border/70 bg-panel/70 p-2 shadow-xl shadow-black/10">
+        <div className="mb-2 flex items-center justify-between px-2 py-1">
+          {tracePanelOpen && (
+            <h3 className="font-display text-base font-semibold">Reasoning Trace</h3>
           )}
-          <ul className="space-y-2">
-            {availableServers.map((server) => (
-              <li
-                key={server.name}
-                className="rounded-xl border border-border/70 bg-background/65 p-2"
-              >
-                <label className="flex cursor-pointer items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedServers.includes(server.name)}
-                    onChange={() => toggleServer(server.name)}
-                    className="mt-1 accent-primary"
-                  />
-                  <span>
-                    <span className="mb-1 flex items-center gap-2">
-                      <strong className="font-medium">{server.label}</strong>
-                      <StatusPill
-                        available={server.available}
-                        label={server.available ? "online" : "offline"}
-                      />
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {server.description}
-                    </span>
-                    <span className="mt-1 block text-[11px] text-muted-foreground/80">
-                      {server.instructions}
-                    </span>
-                  </span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </article>
+          <button
+            type="button"
+            onClick={() => setTracePanelOpen((previous) => !previous)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/70 bg-background/70 text-muted-foreground transition hover:text-foreground"
+            aria-label={tracePanelOpen ? "Collapse reasoning trace" : "Expand reasoning trace"}
+            title={tracePanelOpen ? "Collapse reasoning trace" : "Expand reasoning trace"}
+          >
+            {tracePanelOpen ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        </div>
 
-        <article className="rounded-2xl border border-border/70 bg-panel/70 p-4">
-          <h3 className="mb-3 font-display text-base font-semibold">Reasoning Trace</h3>
-          <div className="max-h-64 space-y-2 overflow-y-auto">
+        {tracePanelOpen ? (
+          <div className="h-[calc(100%-2.8rem)] min-h-0 space-y-2 overflow-y-auto px-1 pb-1">
             {traces.length === 0 && (
               <p className="text-sm text-muted-foreground">
                 Trace events will appear here while the agent works.
@@ -208,7 +251,11 @@ export function ChatStudio() {
               </article>
             ))}
           </div>
-        </article>
+        ) : (
+          <div className="flex h-[calc(100%-2.8rem)] items-center justify-center text-xs font-semibold text-muted-foreground">
+            {traces.length} trace{traces.length === 1 ? "" : "s"}
+          </div>
+        )}
       </aside>
     </section>
   )

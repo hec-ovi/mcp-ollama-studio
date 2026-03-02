@@ -53,13 +53,16 @@ Core backend modules:
 
 ### Frontend
 
-Single-page shell layout with semantic sections:
+Single-page shell layout with full-height, responsive workspace sections:
 
 - Sticky header with nav + theme toggle (system/light/dark)
-- Main panel with animated view transitions
-- Streaming chat console + reasoning trace panel
+- Studio view uses a **three-pane layout**:
+  - left full-height MCP tool/server selection rail
+  - center full-height streaming chat workspace
+  - right full-height **collapsible** reasoning trace rail
 - Markdown answers (tables/code/quotes) with styled rendering
 - Collapsible `Thinking` section when model emits `<think>...</think>` or reasoning fences
+- Auto-scroll while responses stream so the latest assistant output stays in view
 - MCP status dashboard
 - Footer links to `/docs`, `/redoc`, `/openapi.json`
 
@@ -131,9 +134,10 @@ Services:
 
 1. Open `http://localhost:5173`
 2. Confirm MCP cards are visible and reporting status
-3. Send a streaming prompt in Studio view
-4. Watch reasoning trace events appear in real time
-5. Open backend docs at `/docs` and `/redoc`
+3. In Studio, select MCP servers from the left rail and send a streaming prompt
+4. Confirm chat auto-scrolls while streaming and reasoning trace appears on the right rail
+5. Toggle the right rail collapse/expand control and verify trace persistence
+6. Open backend docs at `/docs` and `/redoc`
 
 ## Demo Prompts
 
