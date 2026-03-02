@@ -42,7 +42,7 @@ class AgentService:
         """Run a non-streaming completion by collecting streaming events."""
         chunks: list[str] = []
         traces: list[ReasoningStep] = []
-        model_name = request.model or self._settings.ollama_model
+        model_name = request.model or self._settings.llm_model
 
         async for event in self.stream_events(request):
             if event.type == StreamEventType.TOKEN and event.token is not None:
@@ -55,7 +55,7 @@ class AgentService:
 
     async def stream_events(self, request: ChatCompletionRequest) -> AsyncIterator[StreamEvent]:
         """Stream token and reasoning events from the LangGraph agent."""
-        model_name = request.model or self._settings.ollama_model
+        model_name = request.model or self._settings.llm_model
         temperature = request.temperature
         if temperature is None:
             temperature = self._settings.llm_temperature

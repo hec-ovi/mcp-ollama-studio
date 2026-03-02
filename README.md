@@ -64,6 +64,7 @@ Single-page shell layout with semantic sections:
 ## LLM Provider Switching (OpenAI-Compatible v1)
 
 The backend uses an OpenAI-compatible chat adapter.
+Both streaming and non-streaming endpoints resolve the model from `LLM_MODEL` unless overridden per request.
 
 Set these values in `.env`:
 
