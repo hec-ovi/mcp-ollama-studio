@@ -79,7 +79,7 @@ export function StudioChatPanel({
               className={`rounded-2xl border px-3 py-2 text-sm leading-relaxed ${
                 message.role === "user"
                   ? "rounded-br-none border-primary/35 bg-primary/14"
-                  : "rounded-tr-none border-white/35 bg-background/72 dark:border-white/10 dark:bg-background/40"
+                  : "rounded-tl-none border-white/35 bg-background/72 dark:border-white/10 dark:bg-background/40"
               }`}
             >
               <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
