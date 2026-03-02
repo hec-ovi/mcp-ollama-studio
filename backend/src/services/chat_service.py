@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from uuid import uuid4
 
+from src.core.exceptions import AgentExecutionError
 from src.models.chat import (
     ChatCompletionChoice,
     ChatCompletionChoiceMessage,
@@ -38,51 +39,65 @@ class ChatService:
         created = int(datetime.now(UTC).timestamp())
         model_name = request.model or self._agent_service.default_model
 
-        async for event in self._agent_service.stream_events(request):
-            if event.type == StreamEventType.TOKEN and event.token is not None:
-                payload = {
-                    "id": completion_id,
-                    "object": "chat.completion.chunk",
-                    "created": created,
-                    "model": model_name,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {"content": event.token},
-                            "finish_reason": None,
-                        }
-                    ],
-                }
-                yield self._format_data_line(payload)
-                continue
+        stream_finished = False
+        try:
+            async for event in self._agent_service.stream_events(request):
+                if event.type == StreamEventType.TOKEN and event.token is not None:
+                    payload = {
+                        "id": completion_id,
+                        "object": "chat.completion.chunk",
+                        "created": created,
+                        "model": model_name,
+                        "choices": [
+                            {
+                                "index": 0,
+                                "delta": {"content": event.token},
+                                "finish_reason": None,
+                            }
+                        ],
+                    }
+                    yield self._format_data_line(payload)
+                    continue
 
-            if event.type == StreamEventType.TRACE and event.trace is not None:
-                yield self._format_event_line(
-                    "trace",
-                    event.trace.model_dump(mode="json"),
-                )
-                continue
+                if event.type == StreamEventType.TRACE and event.trace is not None:
+                    yield self._format_event_line(
+                        "trace",
+                        event.trace.model_dump(mode="json"),
+                    )
+                    continue
 
-            if event.type == StreamEventType.ERROR and event.error is not None:
-                yield self._format_event_line("error", {"message": event.error})
-                continue
+                if event.type == StreamEventType.ERROR and event.error is not None:
+                    yield self._format_event_line("error", {"message": event.error})
+                    continue
 
-            if event.type == StreamEventType.DONE:
-                final_payload = {
-                    "id": completion_id,
-                    "object": "chat.completion.chunk",
-                    "created": created,
-                    "model": model_name,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {},
-                            "finish_reason": "stop",
-                        }
-                    ],
-                }
-                yield self._format_data_line(final_payload)
-                yield b"data: [DONE]\n\n"
+                if event.type == StreamEventType.DONE:
+                    stream_finished = True
+                    break
+        except AgentExecutionError as exc:
+            yield self._format_event_line("error", {"message": self._compact_error(str(exc))})
+        except Exception as exc:  # pragma: no cover - defensive catch for stream safety
+            yield self._format_event_line("error", {"message": self._compact_error(str(exc))})
+
+        if not stream_finished:
+            # Close the client stream even when the upstream agent run fails.
+            stream_finished = True
+
+        if stream_finished:
+            final_payload = {
+                "id": completion_id,
+                "object": "chat.completion.chunk",
+                "created": created,
+                "model": model_name,
+                "choices": [
+                    {
+                        "index": 0,
+                        "delta": {},
+                        "finish_reason": "stop",
+                    }
+                ],
+            }
+            yield self._format_data_line(final_payload)
+            yield b"data: [DONE]\n\n"
 
     def _format_data_line(self, payload: dict[str, object]) -> bytes:
         """Format a default SSE data event."""
@@ -94,3 +109,12 @@ class ChatService:
             f"event: {event_name}\n"
             f"data: {json.dumps(payload)}\n\n"
         ).encode()
+
+    def _compact_error(self, message: str) -> str:
+        """Normalize long multi-line failures into concise stream-safe messages."""
+        cleaned = " ".join(message.split())
+        if not cleaned:
+            return "Streaming completion failed."
+        if len(cleaned) <= 400:
+            return cleaned
+        return f"{cleaned[:397]}..."

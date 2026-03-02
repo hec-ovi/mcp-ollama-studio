@@ -69,23 +69,37 @@ export function StudioChatPanel({
         )}
 
         {messages.map((message, index) => (
-          <article
+          <div
             key={`${message.role}-${index}`}
-            className={`border px-3 py-2 text-sm leading-relaxed ${
-              message.role === "user"
-                ? "ml-6 border-primary/30 bg-primary/10"
-                : "mr-6 border-border/70 bg-background"
+            className={`relative max-w-[86%] ${
+              message.role === "user" ? "ml-auto pr-3" : "mr-auto pl-3"
             }`}
           >
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {message.role}
-            </p>
-            {message.role === "assistant" ? (
-              <AssistantMessage content={message.content} />
-            ) : (
-              <p className="whitespace-pre-wrap">{message.content || "..."}</p>
-            )}
-          </article>
+            <article
+              className={`rounded-2xl border px-3 py-2 text-sm leading-relaxed ${
+                message.role === "user"
+                  ? "border-primary/30 bg-primary/10"
+                  : "border-border/70 bg-background"
+              }`}
+            >
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {message.role}
+              </p>
+              {message.role === "assistant" ? (
+                <AssistantMessage content={message.content} />
+              ) : (
+                <p className="whitespace-pre-wrap">{message.content || "..."}</p>
+              )}
+            </article>
+            <span
+              aria-hidden
+              className={`absolute top-3 h-3 w-3 rotate-45 border ${
+                message.role === "user"
+                  ? "right-1 border-b-0 border-l-0 border-primary/30 bg-primary/10"
+                  : "left-1 border-r-0 border-t-0 border-border/70 bg-background"
+              }`}
+            />
+          </div>
         ))}
       </section>
 
