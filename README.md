@@ -1,6 +1,23 @@
-# MCP Ollama Studio
+<h1 align="center">mcp-ollama-studio</h1>
 
-Local-first MCP client with a LangGraph agent, OpenAI-compatible `v1` completion interface, and a Dockerized ROCm Ollama inference stack.
+<p align="center">
+  <strong>Local-first MCP client studio: LangGraph ReAct agent behind OpenAI-compatible <code>/v1/chat/completions</code>, React Studio UI with a reasoning rail, Ollama on AMD ROCm.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Working-brightgreen" alt="Status" />
+  <img src="https://img.shields.io/badge/MCP-Native-7B3FA0" alt="MCP" />
+  <img src="https://img.shields.io/badge/LangGraph-Agent-1C3D5A" alt="LangGraph" />
+  <img src="https://img.shields.io/badge/Ollama-111111?logo=ollama&logoColor=white" alt="Ollama" />
+  <img src="https://img.shields.io/badge/AMD-ROCm-ED1C24?logo=amd&logoColor=white" alt="ROCm" />
+  <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
+</p>
+
+---
+
+## What this is
+
+A three-container Docker Compose stack: a LangGraph ReAct agent backend (FastAPI), a React Studio frontend, and a local Ollama runtime on AMD ROCm. Default MCP servers wired in: DeepWiki (streamable HTTP), Fetch (stdio), and Time (stdio). The backend exposes OpenAI-compatible `/v1/chat/completions` so any OpenAI-compatible client can drive it; the frontend adds a tools rail and a reasoning rail with persistent trace history across turns.
 
 ## Current Stack
 
@@ -210,3 +227,9 @@ npm run build
 4. Send a prompt and verify streaming tokens + trace events
 5. Confirm the composer stays inside the center chat panel at all times
 6. Verify footer links to `/docs`, `/redoc`, `/openapi.json`
+
+---
+
+## License
+
+[MIT](LICENSE).
